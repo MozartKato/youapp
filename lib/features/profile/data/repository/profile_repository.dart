@@ -1,43 +1,75 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import '../../data/models/profile_model.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../domain/entities/profile.dart';
 import '../../../../core/network/dio_config.dart';
 
 class ProfileRepository {
   final Dio _dio = DioConfig.createDio();
+  final _storage = const FlutterSecureStorage();
 
-  Future<Either<String, ProfileModel>> getProfile() async {
+  Future<Either<String, Profile>> getProfile() async {
     try {
-      final response = await _dio.get('/getProfile');
-      final profile = ProfileModel.fromJson(response.data);
-      return Right(profile);
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        return const Left('Unauthorized: Invalid or missing token');
-      } else if (e.response?.statusCode == 500) {
-        return const Left('Server error, please try again later');
-      }
-      return Left('Failed to fetch profile: ${e.message}');
+      final token = await _storage.read(key: 'auth_token');
+      if (token == null) return const Left('No token found');
+
+      final response = await _dio.get(
+        '/getProfile',
+        options: Options(
+          headers: {'x-access-token': token},
+        ),
+      );
+      return Right(Profile.fromJson(response.data));
     } catch (e) {
-      return Left('Unexpected error: ${e.toString()}');
+      return Left('Failed to get profile: ${e.toString()}');
     }
   }
 
-  Future<Either<String, ProfileModel>> createProfile(ProfileModel profile) async {
+  Future<Either<String, Profile>> createProfile({
+    required String name,
+    String birthday = '',
+    int height = 0,
+    int weight = 0,
+    List<String> interests = const [],
+  }) async {
     try {
-      final response = await _dio.post('/createProfile', data: profile.toJson());
-      final newProfile = ProfileModel.fromJson(response.data);
-      return Right(newProfile);
+      final token = await _storage.read(key: 'auth_token');
+      if (token == null) return const Left('No token found');
+
+      final response = await _dio.post(
+        '/createProfile',
+        data: {
+          'name': name,
+          'birthday': birthday,
+          'height': height,
+          'weight': weight,
+          'interests': interests,
+        },
+        options: Options(
+          headers: {'x-access-token': token},
+        ),
+      );
+      print('Create Profile Response: ${response.data}');
+      return Right(Profile.fromJson(response.data));
     } catch (e) {
+      print('Create Profile Error: $e');
       return Left('Failed to create profile: ${e.toString()}');
     }
   }
 
-  Future<Either<String, ProfileModel>> updateProfile(ProfileModel profile) async {
+  Future<Either<String, Profile>> updateProfile(Profile profile) async {
     try {
-      final response = await _dio.put('/updateProfile', data: profile.toJson());
-      final updatedProfile = ProfileModel.fromJson(response.data);
-      return Right(updatedProfile);
+      final token = await _storage.read(key: 'auth_token');
+      if (token == null) return const Left('No token found');
+
+      final response = await _dio.put(
+        '/updateProfile',
+        data: profile.toJson(),
+        options: Options(
+          headers: {'x-access-token': token},
+        ),
+      );
+      return Right(Profile.fromJson(response.data));
     } catch (e) {
       return Left('Failed to update profile: ${e.toString()}');
     }

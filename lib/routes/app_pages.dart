@@ -24,7 +24,6 @@ class AppPages {
         return authController.isLoggedIn.value ? const ProfilePage() : const LoginPage();
       },
       binding: BindingsBuilder(() {
-        // Binding untuk AuthController
         Get.lazyPut(() => AuthRepository());
         Get.lazyPut(() => LoginUseCase(Get.find()));
         Get.lazyPut(() => RegisterUseCase(Get.find()));
@@ -34,8 +33,7 @@ class AppPages {
           Get.find(),
           Get.find(),
         ));
-        // Binding untuk ProfileController
-        Get.lazyPut(() => ProfileRepository());
+        Get.lazyPut(() => ProfileRepository()); // Pastikan ini ada
         Get.lazyPut(() => GetProfileUseCase(Get.find()));
         Get.lazyPut(() => CreateProfileUseCase(Get.find()));
         Get.lazyPut(() => UpdateProfileUseCase(Get.find()));
@@ -59,7 +57,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.register,
-      page: () => const RegisterPage(),
+      page: () => RegisterPage(),
       binding: BindingsBuilder(() {
         Get.lazyPut(() => AuthController(
           Get.find(),

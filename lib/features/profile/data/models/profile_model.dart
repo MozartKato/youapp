@@ -1,50 +1,66 @@
-class ProfileModel {
-  final String email;
-  final String username;
-  final String name;
-  final String birthday;
-  final String horoscope;
-  final int height;
-  final int weight;
-  final List<String> interests;
+import 'package:get/get.dart';
+import '../../domain/entities/profile.dart';
+import '../../domain/use_cases/get_profile_use_case.dart';
+import '../../domain/use_cases/create_profile_use_case.dart';
+import '../../domain/use_cases/update_profile_use_case.dart';
 
-  ProfileModel({
-    required this.email,
-    required this.username,
-    required this.name,
-    required this.birthday,
-    required this.horoscope,
-    required this.height,
-    required this.weight,
-    required this.interests,
+class ProfileController extends GetxController {
+  final GetProfileUseCase getProfileUseCase;
+  final CreateProfileUseCase createProfileUseCase;
+  final UpdateProfileUseCase updateProfileUseCase;
+
+  ProfileController({
+    required this.getProfileUseCase,
+    required this.createProfileUseCase,
+    required this.updateProfileUseCase,
   });
 
-  factory ProfileModel.fromJson(Map<String, dynamic> json) {
-    final data = json['data'] as Map<String, dynamic>; // Ambil field 'data'
-    return ProfileModel(
-      email: data['email'] ?? '',
-      username: data['username'] ?? '',
-      name: data['name'] ?? '',
-      birthday: data['birthday'] ?? '',
-      horoscope: data['horoscope'] ?? '',
-      height: (data['height'] ?? 0) as int,
-      weight: (data['weight'] ?? 0) as int,
-      interests: (data['interests'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+  final profile = Profile(
+    email: '',
+    username: '',
+    name: '',
+  ).obs;
+  final isLoading = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchProfile();
+  }
+
+  Future<void> fetchProfile() async {
+    isLoading.value = true;
+    final result = await getProfileUseCase();
+    isLoading.value = false;
+    result.fold(
+          (error) => Get.snackbar('Error', error),
+          (data) => profile.value = data,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'data': {
-        'email': email,
-        'username': username,
-        'name': name,
-        'birthday': birthday,
-        'horoscope': horoscope,
-        'height': height,
-        'weight': weight,
-        'interests': interests,
-      },
-    };
+  Future<void> createProfile(String name) async {
+    isLoading.value = true;
+    final result = await createProfileUseCase(
+      name: name,
+      birthday: '',
+      height: 0,
+      weight: 0,
+      interests: [],
+    );
+    isLoading.value = false;
+    result.fold(
+          (error) => Get.snackbar('Error', error),
+          (data) => profile.value = data,
+    );
+  }
+
+  Future<void> updateProfile(Profile updatedProfile) async {
+    isLoading.value = true;
+    final result = await updateProfileUseCase(updatedProfile);
+    isLoading.value = false;
+    result.fold(
+          (error) => Get.snackbar('Error', error),
+          (data) => profile.value = data,
+    );
   }
 }

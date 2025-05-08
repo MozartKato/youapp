@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../../data/models/profile_model.dart';
+import 'package:youapp/features/profile/domain/entities/profile.dart';
 import '../../data/repository/profile_repository.dart';
 
 class GetProfileUseCase {
@@ -7,7 +7,7 @@ class GetProfileUseCase {
 
   GetProfileUseCase(this.repository);
 
-  Future<Either<String, ProfileModel>> call() async {
+  Future<Either<String, Profile>> call() async {
     return await repository.getProfile();
   }
 }
