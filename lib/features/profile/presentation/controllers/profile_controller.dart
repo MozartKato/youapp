@@ -15,8 +15,17 @@ class ProfileController extends GetxController {
     required this.updateProfileUseCase,
   });
 
-  final profile = Rxn<ProfileModel>();
-  final isLoading = false.obs;
+  final Rx<ProfileModel> profile = ProfileModel(
+    email: '',
+    username: '',
+    name: '',
+    birthday: '',
+    horoscope: '',
+    height: 0,
+    weight: 0,
+    interests: [],
+  ).obs;
+  final RxBool isLoading = false.obs;
 
   @override
   void onInit() {
@@ -27,33 +36,30 @@ class ProfileController extends GetxController {
   Future<void> fetchProfile() async {
     isLoading.value = true;
     final result = await getProfileUseCase();
-    isLoading.value = false;
-
     result.fold(
           (error) => Get.snackbar('Error', error),
           (data) => profile.value = data,
     );
+    isLoading.value = false;
   }
 
-  Future<void> createProfile(ProfileModel newProfile) async {
+  Future<void> createProfile(ProfileModel profileData) async {
     isLoading.value = true;
-    final result = await createProfileUseCase(newProfile);
-    isLoading.value = false;
-
+    final result = await createProfileUseCase(profileData);
     result.fold(
           (error) => Get.snackbar('Error', error),
           (data) => profile.value = data,
     );
+    isLoading.value = false;
   }
 
-  Future<void> updateProfile(ProfileModel updatedProfile) async {
+  Future<void> updateProfile(ProfileModel profileData) async {
     isLoading.value = true;
-    final result = await updateProfileUseCase(updatedProfile);
-    isLoading.value = false;
-
+    final result = await updateProfileUseCase(profileData);
     result.fold(
           (error) => Get.snackbar('Error', error),
           (data) => profile.value = data,
     );
+    isLoading.value = false;
   }
 }

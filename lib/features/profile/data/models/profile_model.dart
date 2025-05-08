@@ -20,25 +20,31 @@ class ProfileModel {
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
+    final data = json['data'] as Map<String, dynamic>; // Ambil field 'data'
     return ProfileModel(
-      email: json['email'] ?? '',
-      username: json['username'] ?? '',
-      name: json['name'] ?? '',
-      birthday: json['birthday'] ?? '',
-      horoscope: json['horoscope'] ?? '',
-      height: json['height'] ?? 0,
-      weight: json['weight'] ?? 0,
-      interests: List<String>.from(json['interests'] ?? []),
+      email: data['email'] ?? '',
+      username: data['username'] ?? '',
+      name: data['name'] ?? '',
+      birthday: data['birthday'] ?? '',
+      horoscope: data['horoscope'] ?? '',
+      height: (data['height'] ?? 0) as int,
+      weight: (data['weight'] ?? 0) as int,
+      interests: (data['interests'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'name': name,
-      'birthday': birthday,
-      'height': height,
-      'weight': weight,
-      'interests': interests,
+      'data': {
+        'email': email,
+        'username': username,
+        'name': name,
+        'birthday': birthday,
+        'horoscope': horoscope,
+        'height': height,
+        'weight': weight,
+        'interests': interests,
+      },
     };
   }
 }

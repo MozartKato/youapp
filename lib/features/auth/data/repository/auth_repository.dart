@@ -17,7 +17,7 @@ class AuthRepository {
         'password': password,
       });
       final model = LoginModel.fromJson(response.data);
-      print('Login Token: ${model.accessToken}'); // Gunakan accessToken
+      print('Login Token: ${model.accessToken}');
       try {
         await _storage.write(key: 'auth_token', value: model.accessToken);
         final storedToken = await _storage.read(key: 'auth_token');
@@ -26,6 +26,7 @@ class AuthRepository {
           return const Left('Failed to store token');
         }
       } catch (e) {
+        print('Storage Error during Login: $e');
         return Left('Failed to store token: ${e.toString()}');
       }
       return Right(model);
@@ -59,6 +60,7 @@ class AuthRepository {
           return const Left('Failed to store token');
         }
       } catch (e) {
+        print('Storage Error during Register: $e');
         return Left('Failed to store token: ${e.toString()}');
       }
       return Right(model);
@@ -74,6 +76,18 @@ class AuthRepository {
       return const Right(true);
     } catch (e) {
       return Left('Logout failed: ${e.toString()}');
+    }
+  }
+
+  // Method untuk memeriksa token tersimpan
+  Future<String?> getStoredToken() async {
+    try {
+      final token = await _storage.read(key: 'auth_token');
+      print('Retrieved Stored Token: $token');
+      return token;
+    } catch (e) {
+      print('Error retrieving token: $e');
+      return null;
     }
   }
 }
